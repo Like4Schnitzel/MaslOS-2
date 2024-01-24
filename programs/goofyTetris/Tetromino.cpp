@@ -7,7 +7,8 @@ Tetromino::Tetromino(Shape shape)
 
     switch (shape)
     {
-        case Shape::O: {
+        case Shape::O: 
+        {
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 5, 21 },
@@ -17,7 +18,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::I: {
+        case Shape::I: 
+        {
             position = Position((int[4][2]) {
                 { 6, 20 },
                 { 5, 20 },
@@ -27,7 +29,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::J: {
+        case Shape::J: 
+        {
             position = Position((int[4][2]) {
                 { 3, 21 },
                 { 3, 20 },
@@ -37,7 +40,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::L: {
+        case Shape::L: 
+        {
             position = Position((int[4][2]) {
                 { 5, 21 },
                 { 3, 20 },
@@ -47,7 +51,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::S: {
+        case Shape::S: 
+        {
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 5, 21 },
@@ -57,7 +62,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::Z: {
+        case Shape::Z: 
+        {
             position = Position((int[4][2]) {
                 { 3, 21 },
                 { 4, 21 },
@@ -67,7 +73,8 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
 
-        case Shape::T: {
+        case Shape::T:
+        {
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 3, 20 },
@@ -146,4 +153,160 @@ MoveDownResult Tetromino::moveDown(SquareContent playingField[10][24], int lockD
     // if yes, move down
     move(0, 1, playingField);
     return MoveDownResult::MovedDown;
+}
+
+void Tetromino::rotate(bool clockwise, SquareContent playingField[10][24])
+{
+    Tetromino rotated(*this);
+
+    int kickValues[5][2];
+
+    switch (rotated.shape)
+    {
+        // O piece does nothing
+        case Shape::O:
+            return;
+
+        // I piece is special because no rotation coordinates
+        case Shape::I:
+        {
+            int kickValuesTable[4][5][2] = 
+            {
+                { {0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2} },
+                { {0, 0}, {-1, 0}, {2, 0}, {1, -2}, {2, -1} },
+                { {0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2} },
+                { {0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1} }
+            };
+            for (int i = 0; i < 5; i++)
+            {
+                kickValues[i][0] = kickValuesTable[(rotated.rotationState + (!clockwise)) % 4][i][0];
+                kickValues[i][1] = kickValuesTable[(rotated.rotationState + (!clockwise)) % 4][i][1];
+            }
+
+            // project the moving piece to a 4x4 matrix for calculation purposes and swap x with y
+            Position unitPos;
+            Position unitPosCopy;
+            for (int i = 0; i < 4; i++)
+            {
+                unitPosCopy.set(i, 1 - rotated.rotationState % 2, 1 + (rotated.rotationState < 2));
+                unitPosCopy.set(i, rotated.rotationState % 2, rotated.position.get(i,rotated.rotationState%2) - rotated.position.get(3,rotated.rotationState%2));
+
+                unitPos.set(i, rotated.rotationState % 2, 1 + (rotated.rotationState < 2));
+                unitPos.set(i, 1 - rotated.rotationState % 2, rotated.position.get(i,rotated.rotationState%2) - rotated.position.get(3,rotated.rotationState%2));
+            }
+
+            if (clockwise)
+            {
+                rotated.rotationState = (rotated.rotationState + 1) % 4;
+
+                if (rotated.rotationState % 2 == 0)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        unitPos.set(i, 1, unitPos.get(i,1) + 1 - rotated.rotationState);
+                    }
+                }
+            }
+
+            else
+            {
+                if (rotated.rotationState % 2 == 0)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        unitPos.set(i, 0, unitPos.get(i, 0) + 1 - rotated.rotationState);
+                    }
+                }
+
+                for (int i = 0; i < 5; i++)
+                {
+                    kickValues[i][0] *= -1;
+                    kickValues[i][1] *= -1;
+                }
+
+                rotated.rotationState = (rotated.rotationState + 3) % 4;
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                rotated.position.set(i, 0, rotated.position.get(i,0) + unitPos.get(i,0) - unitPosCopy.get(i,0));
+                rotated.position.set(i, 1, rotated.position.get(i,1) + unitPos.get(i,1) - unitPosCopy.get(i,1));
+            }
+
+            break;
+        }
+
+        // all other pieces
+        // the third block is the center of rotation for these
+        default:
+        {
+            int kickValuesTable[4][5][2] =
+            {
+                { {0, 0}, {-1, 0}, {-1, 1},  {0, -2}, {-1, -2} },
+                { {0, 0}, {1, 0},  {1, -1},  {0, 2},  {1, 2}   },
+                { {0, 0}, {1, 0},  {1, 1},   {0, -1}, {1, -2}  },
+                { {0, 0}, {-1, 0}, {-1, -1}, {0, 2},  {-1, 2}  }
+            };
+            for (int i = 0; i < 5; i++)
+            {
+                kickValues[i][0] = kickValuesTable[(rotated.rotationState + !clockwise) % 4][i][0];
+                kickValues[i][1] = kickValuesTable[(rotated.rotationState + !clockwise) % 4][i][1];
+            }
+
+            Position unitPos;
+            Position unitPosCopy;
+            for (int i = 0; i < 4; i++)
+            {
+                unitPosCopy.set(i, 0, rotated.position.get(i, 0) - rotated.position.get(2, 0));
+                unitPosCopy.set(i, 1, rotated.position.get(i, 1) - rotated.position.get(2, 1));
+
+                unitPos.set(i, 0, rotated.position.get(i, 0) - rotated.position.get(2, 0));
+                unitPos.set(i, 1, rotated.position.get(i, 1) - rotated.position.get(2, 1));
+            }
+
+            if (clockwise)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    auto tmp = unitPos.get(i, 0);
+                    unitPos.set(i, 0, unitPos.get(i, 1));
+                    unitPos.set(i, 1, -tmp);
+                }
+
+                rotated.rotationState = (rotated.rotationState + 1) % 4;
+            }
+
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    auto tmp = unitPos.get(i, 0);
+                    unitPos.set(i, 0, -unitPos.get(i, 1));
+                    unitPos.set(i, 1, tmp);
+                }
+
+                rotated.rotationState = (rotated.rotationState + 3) % 4;
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                rotated.position.set(i, 0, rotated.position.get(i,0) + unitPos.get(i,0) - unitPosCopy.get(i,0));
+                rotated.position.set(i, 1, rotated.position.get(i,1) + unitPos.get(i,1) - unitPosCopy.get(i,1));
+            }
+
+            break;
+        }
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        if (rotated.move(kickValues[i][0], kickValues[i][1], playingField))
+            break;
+        
+        if (i == 4)
+            return;
+    }
+
+    position = rotated.position;
+    rotationState = rotated.rotationState;
 }

@@ -28,4 +28,5 @@ class Tetromino {
         Tetromino(Tetromino &original);
         bool move(int x, int y, SquareContent playingField[10][24]);
         MoveDownResult moveDown(SquareContent playingField[10][24], int lockDelay, int lockDelayTimer);
+        void rotate(bool clockwise, SquareContent playingField[10][24]);
 };
