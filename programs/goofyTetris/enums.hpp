@@ -2,4 +2,5 @@
 
 enum class Shape {I, O, T, S, Z, J, L};
 // I to L must be identical to enum class Shape
-enum class SquareContent {I, O, T, S, Z, J, L, EMPTY};
+enum class SquareContent {I, O, T, S, Z, J, L, Empty};
+enum class MoveDownResult {MovedDown, PlacedDown, PlacedDownAboveScreen, LockDelayActive};

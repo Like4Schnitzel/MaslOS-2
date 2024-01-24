@@ -2,8 +2,11 @@
 
 GameState::GameState()
 {
-    for (int i = 0; i < 240; i++)
+    for (int i = 0; i < 10; i++)
     {
-        playingField[i] = SquareContent::EMPTY;
+        for (int j = 0; j < 24; j++)
+        {
+            playingField[i][j] = SquareContent::Empty;
+        }
     }
 }
