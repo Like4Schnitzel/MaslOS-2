@@ -3,11 +3,11 @@
 Tetromino::Tetromino(Shape shape)
 {
     rotationState = 0;
+    color = ShapeToRGB(shape);
 
     switch (shape)
     {
         case Shape::O: {
-            color = (unsigned char[3]) {240, 240, 0};
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 5, 21 },
@@ -18,7 +18,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::I: {
-            color = (unsigned char[3]) {0, 240, 240};
             position = Position((int[4][2]) {
                 { 6, 20 },
                 { 5, 20 },
@@ -29,7 +28,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::J: {
-            color = (unsigned char[3]) {0, 0, 240};
             position = Position((int[4][2]) {
                 { 3, 21 },
                 { 3, 20 },
@@ -40,7 +38,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::L: {
-            color = (unsigned char[3]) {240, 160, 0};
             position = Position((int[4][2]) {
                 { 5, 21 },
                 { 3, 20 },
@@ -51,7 +48,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::S: {
-            color = (unsigned char[3]) {0, 240, 0};
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 5, 21 },
@@ -62,7 +58,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::Z: {
-            color = (unsigned char[3]) {240, 0, 0};
             position = Position((int[4][2]) {
                 { 3, 21 },
                 { 4, 21 },
@@ -73,7 +68,6 @@ Tetromino::Tetromino(Shape shape)
         }
 
         case Shape::T: {
-            color = (unsigned char[3]) {160, 0, 240};
             position = Position((int[4][2]) {
                 { 4, 21 },
                 { 3, 20 },
@@ -83,4 +77,36 @@ Tetromino::Tetromino(Shape shape)
             break;
         }
     }
+}
+
+Tetromino::Tetromino(Tetromino &original)
+{
+    shape = original.shape;
+    position = original.position;
+    color = original.color;
+    rotationState = original.rotationState;
+}
+
+
+/// @return true if move successful, false if unsuccessful
+bool Tetromino::move(int x, int y, SquareContent playingField[240])
+{
+    // check for position validity
+    for (int i = 0; i < 4; i++)
+    {
+        if (position.get(i, 0) + x < 0 || position.get(i, 0) + x > 9 || position.get(i, 1) + y < 0 ||
+            playingField[(position.get(i,0) + x)] != SquareContent::EMPTY)
+        {
+            return false;
+        }
+    }
+
+    // since the position is valid, move
+    for (int i = 0; i < 4; i++)
+    {
+        position.set(i, 0, position.get(i, 0) + x);
+        position.set(i, 1, position.get(i, 1) + y);
+    }
+
+    return true;
 }

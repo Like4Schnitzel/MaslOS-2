@@ -13,6 +13,7 @@ Position::Position(int coords[4][2])
     }
 }
 
+// this is a deep copy
 Position& Position::operator=(Position right)
 {
     for (int i = 0; i < 4; i++)
@@ -30,4 +31,9 @@ Position& Position::operator=(Position right)
 int Position::get(int x, int y)
 {
     return coords[x][y];
+}
+
+void Position::set(int x, int y, int val)
+{
+    coords[x][y] = val;
 }

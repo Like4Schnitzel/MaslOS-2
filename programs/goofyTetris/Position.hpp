@@ -11,4 +11,5 @@ class Position {
         Position& operator=(Position right);
 
         int get(int x, int y);
+        void set(int x, int y, int val);
 };
